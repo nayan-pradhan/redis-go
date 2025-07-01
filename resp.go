@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 const (
@@ -44,4 +45,16 @@ func (r *RESP) readValue() (line []byte, n int, err error) {
 		fmt.Println("Read byte:", b, "Current line:", string(line), "length:", len(line))
 	}
 	return line[:len(line)-2], n, nil
+}
+
+func (r *RESP) readInteger() (x int, n int, err error) {
+	line, n, err := r.readValue() // get the line from the reader
+	if err != nil {
+		return 0, 0, err // return error if any
+	}
+	i64, err := strconv.ParseInt(string(line), 10, 64) // parse the line as an integer
+	if err != nil {
+		return 0, 0, err // return error if parsing fails
+	}
+	return int(i64), n, nil // return the parsed integer and number of bytes read
 }
