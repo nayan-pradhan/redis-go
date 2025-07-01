@@ -58,3 +58,27 @@ func (r *RESP) readInteger() (x int, n int, err error) {
 	}
 	return int(i64), n, nil // return the parsed integer and number of bytes read
 }
+
+func (r *RESP) Read() (Value, error) {
+	_type, err := r.reader.ReadByte() // first byte indicates the type of value
+	if err != nil {
+		return Value{}, err
+	}
+	switch _type {
+	case ARRAY:
+		return r.readArray()
+	case BULK:
+		return r.readBulk()
+	default:
+		fmt.Println("Unknown type: ", string(_type))
+		return Value{}, nil
+	}
+}
+
+func (r *RESP) readArray() (Value, error) {
+	return Value{}, nil
+}
+
+func (r *RESP) readBulk() (Value, error) {
+	return Value{}, nil
+}
