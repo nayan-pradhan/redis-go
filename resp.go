@@ -43,5 +43,5 @@ func (r *RESP) readValue() (line []byte, n int, err error) {
 		}
 		fmt.Println("Read byte:", b, "Current line:", string(line), "length:", len(line))
 	}
-	return line, n, nil
+	return line[:len(line)-2], n, nil
 }
