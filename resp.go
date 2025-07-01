@@ -76,7 +76,21 @@ func (r *RESP) Read() (Value, error) {
 }
 
 func (r *RESP) readArray() (Value, error) {
-	return Value{}, nil
+	v := Value{typ: "array"}
+
+	len, _, err := r.readInteger() // read the length of the array
+	if err != nil {
+		return v, err // return error if reading length fails
+	}
+	v.array = make([]Value, 0)
+	for i := 0; i < len; i++ {
+		val, err := r.Read()
+		if err != nil {
+			return v, err
+		}
+		v.array = append(v.array, val) // append the read value to the array
+	}
+	return v, nil
 }
 
 func (r *RESP) readBulk() (Value, error) {
