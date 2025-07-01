@@ -83,7 +83,7 @@ func (r *RESP) readArray() (Value, error) {
 		return v, err // return error if reading length fails
 	}
 	v.array = make([]Value, 0)
-	for i := 0; i < len; i++ {
+	for range len {
 		val, err := r.Read()
 		if err != nil {
 			return v, err
