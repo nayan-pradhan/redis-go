@@ -25,8 +25,8 @@ func main() {
 	defer conn.Close()
 
 	for {
-		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
+		resp := NewRESP(conn)
+		value, err := resp.Read()
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("Connection closed by client.")
@@ -35,8 +35,7 @@ func main() {
 			fmt.Println("Error reading from connection:", err.Error())
 			os.Exit(1)
 		}
-		// for now ignore request and send OK response
+		fmt.Println(value)
 		conn.Write([]byte("+OK\r\n"))
-		fmt.Println("Received request, sent OK response.")
 	}
 }
