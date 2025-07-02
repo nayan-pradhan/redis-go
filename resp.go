@@ -42,7 +42,7 @@ func (r *RESP) readValue() (line []byte, n int, err error) {
 		if len(line) >= 2 && line[len(line)-2] == '\r' {
 			break // Check if the last two bytes are \r\n, indicating end of line
 		}
-		fmt.Println("Read byte:", b, "Current line:", string(line), "length:", len(line))
+		// fmt.Println("Read byte:", b, "Current line:", string(line), "length:", len(line))
 	}
 	return line[:len(line)-2], n, nil
 }
