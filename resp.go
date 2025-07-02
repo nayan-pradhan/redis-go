@@ -94,5 +94,15 @@ func (r *RESP) readArray() (Value, error) {
 }
 
 func (r *RESP) readBulk() (Value, error) {
-	return Value{}, nil
+	v := Value{typ: "bulk"}
+
+	len, _, err := r.readInteger() // read the length of the bulk string
+	if err != nil {
+		return v, err // return error if reading length fails
+	}
+	bulk := make([]byte, len) // create a byte slice of the specified length
+	r.reader.Read(bulk)       // read the bulk string into the byte slice
+	v.bulk = string(bulk)     // convert the byte slice to a string
+	r.readValue()             // read the trailing \r\n
+	return v, nil
 }
