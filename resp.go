@@ -116,9 +116,11 @@ func (v Value) Marshal() []byte { // Marshal method that calls the specefied met
 	case "string":
 		return v.marshalString()
 	case "null":
-		return v.marshlNull()
+		return v.marshalNull()
 	case "error":
 		return v.marshalError()
+	case "integer":
+		return v.marshalInteger()
 	default:
 		return []byte{}
 	}
@@ -151,6 +153,14 @@ func (v Value) marshalArray() []byte {
 	for i := 0; i < len; i++ {                          // iterate over each element in the array
 		bytes = append(bytes, (v.array[i]).Marshal()...) // recursively marshal each element and append to the output
 	}
+	return bytes
+}
+
+func (v Value) marshalInteger() []byte {
+	var bytes []byte
+	bytes = append(bytes, INTEGER)                        // adds constant prefix (':') to start output
+	bytes = append(bytes, []byte(strconv.Itoa(v.num))...) // appends the integer value as a string
+	bytes = append(bytes, '\r', '\n')                     // appends suffix \r\n to indicate end of the integer
 	return bytes
 }
 
