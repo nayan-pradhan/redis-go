@@ -127,8 +127,18 @@ func (v Value) Marshal() []byte { // Marshal method that calls the specefied met
 func (v Value) marshalString() []byte {
 	var bytes []byte                  // create empty byte slice to hold marshaled output
 	bytes = append(bytes, STRING)     // adds const prefix ('+') to start output
-	bytes = append(bytes, v.str...)   //  appends each byte of the string value to the output
+	bytes = append(bytes, v.str...)   // appends each byte of the string value to the output
 	bytes = append(bytes, '\r', '\n') // appends suffix \r\n to indicate end of the string
 
+	return bytes
+}
+
+func (v Value) marshalBulk() []byte {
+	var bytes []byte                                    // create empty byte slice to hold marshaled output
+	bytes = append(bytes, BULK)                         // adds constant prefix ('$') to start output
+	bytes = append(bytes, strconv.Itoa(len(v.bulk))...) // appends the length of the bulk string
+	bytes = append(bytes, '\r', '\n')                   // appends suffix \r\n to
+	bytes = append(bytes, v.bulk...)                    // appends the bulk string itself
+	bytes = append(bytes, '\r', '\n')                   // appends another \r\n to indicate end of the bulk string
 	return bytes
 }
