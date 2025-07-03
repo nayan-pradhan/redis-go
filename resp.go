@@ -129,7 +129,6 @@ func (v Value) marshalString() []byte {
 	bytes = append(bytes, STRING)     // adds const prefix ('+') to start output
 	bytes = append(bytes, v.str...)   // appends each byte of the string value to the output
 	bytes = append(bytes, '\r', '\n') // appends suffix \r\n to indicate end of the string
-
 	return bytes
 }
 
@@ -140,5 +139,17 @@ func (v Value) marshalBulk() []byte {
 	bytes = append(bytes, '\r', '\n')                   // appends suffix \r\n to
 	bytes = append(bytes, v.bulk...)                    // appends the bulk string itself
 	bytes = append(bytes, '\r', '\n')                   // appends another \r\n to indicate end of the bulk string
+	return bytes
+}
+
+func (v Value) marshalArray() []byte {
+	len := len(v.array)                                 // get the length of the array
+	var bytes []byte                                    // create empty byte slice to hold marshaled output
+	bytes = append(bytes, ARRAY)                        // adds constant prefix ('*') to start output
+	bytes = append(bytes, []byte(strconv.Itoa(len))...) // appends the length of the array as a string
+	bytes = append(bytes, '\r', '\n')                   // appends suffix \r\n to indicate end of the length
+	for i := 0; i < len; i++ {                          // iterate over each element in the array
+		bytes = append(bytes, (v.array[i]).Marshal()...) // recursively marshal each element and append to the output
+	}
 	return bytes
 }
