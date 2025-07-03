@@ -106,3 +106,20 @@ func (r *RESP) readBulk() (Value, error) {
 	r.readValue()             // read the trailing \r\n
 	return v, nil
 }
+
+func (v Value) Marshal() []byte { // Marshal method that calls the specefied method based on the type of value
+	switch v.typ {
+	case "array":
+		return v.marshalArray()
+	case "bulk":
+		return v.marshalBulk()
+	case "string":
+		return v.marshalString()
+	case "null":
+		return v.marshlNull()
+	case "error":
+		return v.marshalError()
+	default:
+		return []byte{}
+	}
+}
