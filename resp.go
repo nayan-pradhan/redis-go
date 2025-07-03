@@ -47,7 +47,7 @@ func (r *RESP) readValue() (line []byte, n int, err error) {
 	return line[:len(line)-2], n, nil
 }
 
-func (r *RESP) readInteger() (x int, n int, err error) {
+func (r *RESP) readIntegerByte() (x int, n int, err error) {
 	line, n, err := r.readValue() // get the line from the reader
 	if err != nil {
 		return 0, 0, err // return error if any
@@ -69,6 +69,10 @@ func (r *RESP) Read() (Value, error) {
 		return r.readArray()
 	case BULK:
 		return r.readBulk()
+	case INTEGER:
+		return r.readInteger()
+	case STRING:
+		return r.readString()
 	default:
 		fmt.Println("Unknown type: ", string(_type))
 		return Value{}, nil
@@ -78,7 +82,7 @@ func (r *RESP) Read() (Value, error) {
 func (r *RESP) readArray() (Value, error) {
 	v := Value{typ: "array"}
 
-	len, _, err := r.readInteger() // read the length of the array
+	len, _, err := r.readIntegerByte() // read the length of the array
 	if err != nil {
 		return v, err // return error if reading length fails
 	}
@@ -93,10 +97,30 @@ func (r *RESP) readArray() (Value, error) {
 	return v, nil
 }
 
+func (r *RESP) readString() (Value, error) {
+	v := Value{typ: "string"}
+	line, _, err := r.readValue() // read the string value
+	if err != nil {
+		return v, err // return error if reading string fails
+	}
+	v.str = string(line) // convert the byte slice to a string
+	return v, nil        // return the Value containing the string
+}
+
+func (r *RESP) readInteger() (Value, error) {
+	v := Value{typ: "integer"}
+	num, _, err := r.readIntegerByte() // read the integer value
+	if err != nil {
+		return v, err // return error if reading integer fails
+	}
+	v.num = num   // set the integer value
+	return v, nil // return the Value containing the integer
+}
+
 func (r *RESP) readBulk() (Value, error) {
 	v := Value{typ: "bulk"}
 
-	len, _, err := r.readInteger() // read the length of the bulk string
+	len, _, err := r.readIntegerByte() // read the length of the bulk string
 	if err != nil {
 		return v, err // return error if reading length fails
 	}
@@ -174,4 +198,22 @@ func (v Value) marshalError() []byte {
 	bytes = append(bytes, v.str...)   // appends the error message string
 	bytes = append(bytes, '\r', '\n') // appends suffix \r\n to
 	return bytes
+}
+
+type Writer struct {
+	writer io.Writer // Writer to write RESP data
+}
+
+func NewWriter(w io.Writer) *Writer {
+	return &Writer{writer: w} // Create a new Writer instance with the provided io.Writer
+}
+
+func (w *Writer) Write(v Value) error {
+	var bytes = v.Marshal()         // Marshal the value to bytes
+	_, err := w.writer.Write(bytes) // Write the marshaled bytes to the writer
+	if err != nil {
+		fmt.Println("Error writing to connection:", err)
+		return err // return error if writing fails
+	}
+	return nil // return nil if writing is successful
 }
