@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"os"
 )
 
 func main() {
@@ -33,9 +32,12 @@ func main() {
 				break
 			}
 			fmt.Println("Error reading from connection:", err.Error())
-			os.Exit(1)
+			return
 		}
-		fmt.Println(value)
-		conn.Write([]byte("+OK\r\n"))
+		_ = value // Ignore the value for now, just to demonstrate reading
+		writer := NewWriter(conn)
+		writer.Write(Value{typ: "string", str: "OK"})
+		// fmt.Println(value)
+		// conn.Write([]byte("+OK\r\n"))
 	}
 }
