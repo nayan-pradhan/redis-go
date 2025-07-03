@@ -123,3 +123,12 @@ func (v Value) Marshal() []byte { // Marshal method that calls the specefied met
 		return []byte{}
 	}
 }
+
+func (v Value) marshalString() []byte {
+	var bytes []byte                  // create empty byte slice to hold marshaled output
+	bytes = append(bytes, STRING)     // adds const prefix ('+') to start output
+	bytes = append(bytes, v.str...)   //  appends each byte of the string value to the output
+	bytes = append(bytes, '\r', '\n') // appends suffix \r\n to indicate end of the string
+
+	return bytes
+}
