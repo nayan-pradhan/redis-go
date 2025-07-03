@@ -153,3 +153,7 @@ func (v Value) marshalArray() []byte {
 	}
 	return bytes
 }
+
+func (v Value) marshalNull() []byte {
+	return []byte("$-1\r\n") // returns the marshaled representation of a null value
+}
