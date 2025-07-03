@@ -157,3 +157,11 @@ func (v Value) marshalArray() []byte {
 func (v Value) marshalNull() []byte {
 	return []byte("$-1\r\n") // returns the marshaled representation of a null value
 }
+
+func (v Value) marshalError() []byte {
+	var bytes []byte
+	bytes = append(bytes, ERROR)      // adds constant prefix ('-') to start output
+	bytes = append(bytes, v.str...)   // appends the error message string
+	bytes = append(bytes, '\r', '\n') // appends suffix \r\n to
+	return bytes
+}
