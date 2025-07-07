@@ -58,8 +58,8 @@ func main() {
 		if !ok {
 			fmt.Println("Invalid command: ", command)
 			writer.Write(Value{
-				typ: "string",
-				str: "",
+				typ: "error",
+				str: fmt.Sprintf("ERR unknown command '%s'", command),
 			})
 			continue
 		}
