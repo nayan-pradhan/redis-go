@@ -9,10 +9,13 @@ var Handlers = map[string]func([]Value) Value{
 	"PING": ping,
 	"SET":  set,
 	"GET":  get,
+	"HSET": hset,
 }
 
 var SETs = map[string]string{}
 var SETsMu = sync.RWMutex{} // using sync.RWMutex because our server should handle requests concurrently
+var HSETs = map[string]map[string]string{}
+var HSETsMU = sync.RWMutex{} // using sync.RWMutex because our server should handle requests concurrently
 
 func ping(args []Value) Value {
 	if len(args) == 0 {
@@ -28,7 +31,7 @@ func ping(args []Value) Value {
 }
 
 func set(args []Value) Value {
-	if len(args) < 2 {
+	if len(args) != 2 {
 		fmt.Println("Invalid. Args received: ", args)
 		return Value{
 			typ: "error",
@@ -66,5 +69,30 @@ func get(args []Value) Value {
 	return Value{
 		typ:  "bulk",
 		bulk: value,
+	}
+}
+
+func hset(args []Value) Value {
+	if len(args) != 3 {
+		fmt.Println("Invalid. Args received: ", args)
+		return Value{
+			typ: "error",
+			str: "ERR wrong number of arguments for 'hset' command, should receive a key key value pair to store!",
+		}
+	}
+	hash := args[0].bulk
+	key := args[1].bulk
+	value := args[2].bulk
+
+	HSETsMU.Lock()
+	if _, ok := HSETs[hash]; !ok { // checks if key exists in hash map, if not init empty hash value
+		HSETs[hash] = map[string]string{}
+	}
+	HSETs[hash][key] = value
+	HSETsMU.Unlock()
+
+	return Value{
+		typ: "string",
+		str: "OK",
 	}
 }
