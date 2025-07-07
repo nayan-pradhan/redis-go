@@ -10,6 +10,8 @@ var Handlers = map[string]func([]Value) Value{
 	"SET":  set,
 	"GET":  get,
 	"HSET": hset,
+	"HGET": hget,
+	"HGETALL": hgetall,
 }
 
 var SETs = map[string]string{}
@@ -77,7 +79,7 @@ func hset(args []Value) Value {
 		fmt.Println("Invalid. Args received: ", args)
 		return Value{
 			typ: "error",
-			str: "ERR wrong number of arguments for 'hset' command, should receive a key key value pair to store!",
+			str: "ERR wrong number of arguments for 'hset' command, should receive a hash key value pair to store!",
 		}
 	}
 	hash := args[0].bulk
@@ -94,5 +96,33 @@ func hset(args []Value) Value {
 	return Value{
 		typ: "string",
 		str: "OK",
+	}
+}
+
+func hget(args []Value) Value {
+	if len(args) != 2 {
+		fmt.Println("Invalid. Args received: ", args)
+		return Value{
+			typ: "err",
+			str: "ERR wrong number of arguments for 'hget' command, should receive a hash and key to get value"	
+		}
+	}
+
+	hash = args[0].bulk
+	key = args[1].bulk
+
+	HSETsMU.RLock()
+	value, ok := HSETs[hash][key]
+	HSETsMU.RUnlock()
+
+	if !ok {
+		return Value{
+			typ: "null"
+		}
+	}
+
+	return Value{
+		typ: "bulk"
+		bulk: value,
 	}
 }
