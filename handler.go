@@ -6,11 +6,11 @@ import (
 )
 
 var Handlers = map[string]func([]Value) Value{
-	"PING": ping,
-	"SET":  set,
-	"GET":  get,
-	"HSET": hset,
-	"HGET": hget,
+	"PING":    ping,
+	"SET":     set,
+	"GET":     get,
+	"HSET":    hset,
+	"HGET":    hget,
 	"HGETALL": hgetall,
 }
 
@@ -104,12 +104,12 @@ func hget(args []Value) Value {
 		fmt.Println("Invalid. Args received: ", args)
 		return Value{
 			typ: "err",
-			str: "ERR wrong number of arguments for 'hget' command, should receive a hash and key to get value"	
+			str: "ERR wrong number of arguments for 'hget' command, should receive a hash and key to get value",
 		}
 	}
 
-	hash = args[0].bulk
-	key = args[1].bulk
+	hash := args[0].bulk
+	key := args[1].bulk
 
 	HSETsMU.RLock()
 	value, ok := HSETs[hash][key]
@@ -117,12 +117,42 @@ func hget(args []Value) Value {
 
 	if !ok {
 		return Value{
-			typ: "null"
+			typ: "null",
 		}
 	}
 
 	return Value{
-		typ: "bulk"
+		typ:  "bulk",
 		bulk: value,
+	}
+}
+
+func hgetall(args []Value) Value {
+	if len(args) != 1 {
+		fmt.Println("Invalid. Args received: ", args)
+		return Value{
+			typ: "error",
+			str: "ERR wrong number of arguments for 'HGETALL', should receive a single key value",
+		}
+	}
+
+	hash := args[0].bulk
+	HSETsMU.RLock()
+	value, ok := HSETs[hash]
+	HSETsMU.RUnlock()
+	if !ok {
+		return Value{
+			typ: "null",
+		}
+	}
+	arrayValue := make([]Value, 0)
+	for k, v := range value {
+		arrayValue = append(arrayValue, Value{typ: "bulk", bulk: k})
+		arrayValue = append(arrayValue, Value{typ: "bulk", bulk: v})
+	}
+
+	return Value{
+		typ:   "array",
+		array: arrayValue,
 	}
 }
