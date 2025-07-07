@@ -38,12 +38,33 @@ func set(args []Value) Value {
 	key := args[0].bulk
 	value := args[1].bulk
 
-	SETsMu.Lock()
+	SETsMu.Lock() // blocks all other goroutines (read + write) until lock is released
 	SETs[key] = value
 	SETsMu.Unlock()
 	return Value{typ: "string", str: "OK"}
 }
 
 func get(args []Value) Value {
-	return Value{}
+	if len(args) != 1 { // argument should only be key to search
+		fmt.Println("Invalid. Arg received: ", args)
+		return Value{
+			typ: "error",
+			str: "ERR wrong number of arguments for 'get' command, should receive a key to search!",
+		}
+	}
+	key := args[0].bulk
+
+	SETsMu.RLock() // multiple goroutines can read at same time as long as no goroutine holds write lock
+	value, ok := SETs[key]
+	SETsMu.RUnlock()
+
+	if !ok {
+		return Value{
+			typ: "null",
+		}
+	}
+	return Value{
+		typ:  "bulk",
+		bulk: value,
+	}
 }
