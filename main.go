@@ -15,6 +15,16 @@ func main() {
 		fmt.Println("Error starting server:", err)
 		return
 	}
+
+	aof, err := NewAof("Database.aof")
+	if err != nil {
+		fmt.Println(err)
+		return
+	} else {
+		fmt.Print("Aof active.")
+	}
+	defer aof.Close()
+
 	fmt.Printf("Listening on port %s.\n", port)
 	conn, err := l.Accept()
 	if err != nil {
@@ -49,8 +59,8 @@ func main() {
 		command := strings.ToUpper(value.array[0].bulk)
 		args := value.array[1:]
 
-		fmt.Println("command: ", command)
-		fmt.Println("args: ", args)
+		// fmt.Println("command: ", command)
+		// fmt.Println("args: ", args)
 
 		writer := NewWriter(conn)
 
@@ -62,6 +72,9 @@ func main() {
 				str: fmt.Sprintf("ERR unknown command '%s'", command),
 			})
 			continue
+		}
+		if command == "SET" || command == "HSET" {
+			aof.Write(value)
 		}
 		result := handler(args)
 		writer.Write(result)
