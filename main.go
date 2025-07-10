@@ -21,9 +21,20 @@ func main() {
 		fmt.Println(err)
 		return
 	} else {
-		fmt.Print("Aof active.")
+		fmt.Println("Aof active.")
 	}
 	defer aof.Close()
+
+	aof.Read(func(value Value) {
+		command := strings.ToUpper(value.array[0].bulk)
+		args := value.array[1:]
+		handler, ok := Handlers[command]
+		if !ok {
+			fmt.Println("Invalid command in aof read ", command)
+			return
+		}
+		handler(args)
+	})
 
 	fmt.Printf("Listening on port %s.\n", port)
 	conn, err := l.Accept()
