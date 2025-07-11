@@ -103,7 +103,7 @@ func hget(args []Value) Value {
 	if len(args) != 2 {
 		fmt.Println("Invalid. Args received: ", args)
 		return Value{
-			typ: "err",
+			typ: "error",
 			str: "ERR wrong number of arguments for 'hget' command, should receive a hash and key to get value",
 		}
 	}
