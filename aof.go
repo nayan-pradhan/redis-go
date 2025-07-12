@@ -72,7 +72,6 @@ func (aof *Aof) Read(callback func(value Value)) error {
 		if err == io.EOF {
 			break
 		}
-		return err
 	}
 	return nil
 }

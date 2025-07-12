@@ -70,9 +70,6 @@ func main() {
 		command := strings.ToUpper(value.array[0].bulk)
 		args := value.array[1:]
 
-		// fmt.Println("command: ", command)
-		// fmt.Println("args: ", args)
-
 		writer := NewWriter(conn)
 
 		handler, ok := Handlers[command]
