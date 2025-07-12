@@ -12,6 +12,7 @@ var Handlers = map[string]func([]Value) Value{
 	"HSET":    hset,
 	"HGET":    hget,
 	"HGETALL": hgetall,
+	// TODO (npradhan) : implement DEL handler
 }
 
 var SETs = map[string]string{}
