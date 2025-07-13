@@ -12,7 +12,7 @@ var Handlers = map[string]func([]Value) Value{
 	"HSET":    hset,
 	"HGET":    hget,
 	"HGETALL": hgetall,
-	// TODO (npradhan) : implement DEL handler
+	"DEL":     del,
 }
 
 var SETs = map[string]string{}
@@ -155,5 +155,31 @@ func hgetall(args []Value) Value {
 	return Value{
 		typ:   "array",
 		array: arrayValue,
+	}
+}
+
+func del(args []Value) Value {
+	if len(args) != 1 {
+		fmt.Println("Invalid number of arguments of 'del' command, should receive key to delete from storage.")
+		return Value{
+			typ: "error",
+			str: "ERR wrong number of arguments for 'DEL', should receive a key",
+		}
+	}
+	key := args[0].bulk
+	SETsMu.Lock()
+	_, ok := SETs[key]
+	count := 0
+	if !ok { // key does not exist in map
+		fmt.Printf("%s does not exist in memory, no action is taken.\n", key)
+	} else {
+		delete(SETs, key)
+		count += 1
+	}
+	SETsMu.Unlock()
+
+	return Value{
+		typ: "integer",
+		num: count,
 	}
 }
