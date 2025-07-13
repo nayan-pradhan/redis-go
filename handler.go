@@ -159,24 +159,28 @@ func hgetall(args []Value) Value {
 }
 
 func del(args []Value) Value {
-	if len(args) != 1 {
-		fmt.Println("Invalid number of arguments of 'del' command, should receive key to delete from storage.")
+	if len(args) < 1 {
+		fmt.Println("Invalid number of arguments of 'del' command, should receive key/s to delete from storage.")
 		return Value{
 			typ: "error",
-			str: "ERR wrong number of arguments for 'DEL', should receive a key",
+			str: "ERR wrong number of arguments for 'DEL', should receive a key/s",
 		}
 	}
-	key := args[0].bulk
-	SETsMu.Lock()
-	_, ok := SETs[key]
+
 	count := 0
-	if !ok { // key does not exist in map
-		fmt.Printf("%s does not exist in memory, no action is taken.\n", key)
-	} else {
-		delete(SETs, key)
-		count += 1
+	keys := args[0:]
+	SETsMu.Lock()
+	defer SETsMu.Unlock()
+
+	for k := range keys {
+		_, ok := SETs[keys[k].bulk]
+		if !ok { // key does not exist in map
+			fmt.Printf("%s does not exist in memory, no action taken.\n", keys[k].bulk)
+		} else {
+			delete(SETs, keys[k].bulk)
+			count += 1
+		}
 	}
-	SETsMu.Unlock()
 
 	return Value{
 		typ: "integer",
