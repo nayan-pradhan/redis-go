@@ -166,30 +166,24 @@ func del(args []Value) Value {
 			str: "ERR wrong number of arguments for 'DEL', should receive a key/s",
 		}
 	}
-	// key := args[0].bulk
-	keys := args[0:]
-	for k := 0; k < len(keys); k++ {
-		fmt.Printf("%d: %v\n", k, keys[k])
 
+	count := 0
+	keys := args[0:]
+	SETsMu.Lock()
+	defer SETsMu.Unlock()
+
+	for k := range keys {
+		_, ok := SETs[keys[k].bulk]
+		if !ok { // key does not exist in map
+			fmt.Printf("%s does not exist in memory, no action taken.\n", keys[k].bulk)
+		} else {
+			delete(SETs, keys[k].bulk)
+			count += 1
+		}
 	}
 
 	return Value{
 		typ: "integer",
-		num: 0,
+		num: count,
 	}
-	// SETsMu.Lock()
-	// _, ok := SETs[key]
-	// count := 0
-	// if !ok { // key does not exist in map
-	// 	fmt.Printf("%s does not exist in memory, no action is taken.\n", key)
-	// } else {
-	// 	delete(SETs, key)
-	// 	count += 1
-	// }
-	// SETsMu.Unlock()
-
-	// return Value{
-	// 	typ: "integer",
-	// 	num: count,
-	// }
 }
