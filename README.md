@@ -21,14 +21,13 @@ A minimal Redis-like server implemented in Go, supporting basic key-value and ha
 ### Build & Run
 
 ```bash
-go build -o redis-go main.go
-./redis-go
+go run .
 ```
 
 ### Connect with redis-cli
 
 ```bash
-redis-cli -p 6380
+redis-cli 
 ```
 
 ## Supported Commands
