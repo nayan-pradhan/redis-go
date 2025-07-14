@@ -41,6 +41,7 @@ redis-cli
 | HSET      | Set field in hash                                | `HSET myhash field value`    |
 | HGET      | Get field value from hash                        | `HGET myhash field`          |
 | HGETALL   | Get all fields and values from hash              | `HGETALL myhash`             |
+| HDEL      | Delete field(s) from hash                         | `HDEL myhash field1 field2`  |
 
 ## Project Structure
 
