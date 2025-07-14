@@ -13,6 +13,7 @@ var Handlers = map[string]func([]Value) Value{
 	"HGET":    hget,
 	"HGETALL": hgetall,
 	"DEL":     del,
+	"HDEL":    hdel,
 }
 
 var SETs = map[string]string{}
@@ -186,4 +187,41 @@ func del(args []Value) Value {
 		typ: "integer",
 		num: count,
 	}
+}
+
+func hdel(args []Value) Value {
+	if len(args) < 2 {
+		return Value{
+			typ: "error",
+			str: "ERR wrong number of arguments of 'hdel' command, should receive hash key/s to delete from memory",
+		}
+	}
+
+	count := 0
+	hash := args[0].bulk
+	keys := args[1:]
+
+	HSETsMU.Lock()
+	defer HSETsMU.Unlock()
+
+	_, ok := HSETs[hash]
+	if !ok {
+		fmt.Printf("%s does not exist as hash.\n", hash)
+	} else {
+		for k := range keys {
+			_, ok = HSETs[hash][keys[k].bulk]
+			if !ok {
+				fmt.Printf("%s does not exist in hash with key\n", keys[k].bulk)
+			} else {
+				delete(HSETs[hash], keys[k].bulk)
+				count += 1
+			}
+		}
+	}
+
+	return Value{
+		typ: "integer",
+		num: count,
+	}
+
 }
