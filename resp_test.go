@@ -119,3 +119,45 @@ func TestRESPReadArray(t *testing.T) {
 		t.Errorf("Read array[1]: got typ=%q, bulk=%q; want typ=\"bulk\", bulk=\"bar\"", v.array[1].typ, v.array[1].bulk)
 	}
 }
+
+func TestDelHandler(t *testing.T) {
+	SETs["foo"] = "bar"
+	SETs["baz"] = "qux"
+
+	// Single key delete
+	res := del([]Value{{bulk: "foo"}})
+	if res.typ != "integer" || res.num != 1 {
+		t.Errorf("DEL single: got typ=%q, num=%d; want typ=\"integer\", num=1", res.typ, res.num)
+	}
+	if _, ok := SETs["foo"]; ok {
+		t.Errorf("DEL single: key 'foo' should be deleted")
+	}
+
+	// Multiple key delete
+	SETs["baz"] = "qux"
+	SETs["bar"] = "baz"
+	res = del([]Value{{bulk: "baz"}, {bulk: "bar"}, {bulk: "notfound"}})
+	if res.typ != "integer" || res.num != 2 {
+		t.Errorf("DEL multi: got typ=%q, num=%d; want typ=\"integer\", num=2", res.typ, res.num)
+	}
+}
+
+func TestHDelHandler(t *testing.T) {
+	hash := "myhash"
+	HSETs[hash] = map[string]string{"field1": "val1", "field2": "val2", "field3": "val3"}
+
+	// Single field delete
+	res := hdel([]Value{{bulk: hash}, {bulk: "field1"}})
+	if res.typ != "integer" || res.num != 1 {
+		t.Errorf("HDEL single: got typ=%q, num=%d; want typ=\"integer\", num=1", res.typ, res.num)
+	}
+	if _, ok := HSETs[hash]["field1"]; ok {
+		t.Errorf("HDEL single: field 'field1' should be deleted")
+	}
+
+	// Multiple field delete
+	res = hdel([]Value{{bulk: hash}, {bulk: "field2"}, {bulk: "field3"}, {bulk: "notfound"}})
+	if res.typ != "integer" || res.num != 2 {
+		t.Errorf("HDEL multi: got typ=%q, num=%d; want typ=\"integer\", num=2", res.typ, res.num)
+	}
+}
